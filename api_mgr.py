@@ -21,25 +21,19 @@ def train():
             sql = "SELECT i.imgpath, d.breed FROM imgMap i INNER JOIN dogbreeds d ON i.breed = d.id"
             cursor.execute(sql)
             # result = cursor.fetchall()
-            result = cursor.fetchmany(10)
+            result = cursor.fetchmany(30)
             print(result)
     finally:
         connection.close()
-    '''
-      for dir in os.listdir(img_dir):
-          breed = []
-          dir = os.path.join(img_dir, dir)
-          for file in os.listdir(dir):
-              print('Running:', dir, file)
-              breed.append([os.path.abspath(os.path.join(dir, file)), dir])
-          collection.add_data(breed)
-      '''
+    for row in result:
+        print('Running:', row['imgpath'], row['breed'])
+        collection.add_data([row['imgpath'], row['breed']])
+
     # Training
     collection.train()
 
     # Telling Collection to block until ready
     collection.wait()
-
 
 def predict(img):
     return sorted(collection.predict(img).items(), key=lambda s: s[1], reverse=True)[:5]
@@ -73,4 +67,4 @@ def addToDb(img, breed):
         connection.commit()
 
 
-initDb(os.path.realpath('Images'))
+train()
