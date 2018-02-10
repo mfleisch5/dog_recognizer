@@ -1,30 +1,28 @@
-import indicoio, os, base64
+import indicoio, os, requests
 from indicoio.custom import Collection
+
 indicoio.config.api_key = '5c6a25f102276fa6acbf0a5ac79548a5'
 
 collection = Collection("dogs")
 
+
 # Add Data
-""""
-for dir in os.listdir('Images'):
-    pics, count = [], 0
-    for file in os.listdir('Images/' + dir):
-        print('Running:', dir, file)
-        pics.append([os.path.abspath('Images/' + dir + '/' + file), dir])
-        count += 1
-        if count == 5:
-            break
-    collection.add_data(pics)
+
+def train(img_dir):
+    for dir in os.listdir(img_dir):
+        breed = []
+        dir = os.path.join(img_dir, dir)
+        for file in os.listdir(dir):
+            print('Running:', dir, file)
+            breed.append([os.path.abspath(os.path.join(dir, file)), dir])
+        collection.add_data(breed)
+
+    # Training
+    collection.train()
+
+    # Telling Collection to block until ready
+    collection.wait()
 
 
-
-# Training
-collection.train()
-
-# Telling Collection to block until ready
-collection.wait()
-"""
-
-
-print(*sorted(collection.predict(os.path.abspath('Images/Yorkshire_terrier/n02094433_4005.jpg')).items(), reverse=True,
-              key=lambda p: p[1]), sep='\n')
+def predict(img):
+    return sorted(collection.predict(img).items(), key=lambda s: s[1], reverse=True)[:5]
