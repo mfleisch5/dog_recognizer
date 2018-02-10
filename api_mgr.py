@@ -47,7 +47,7 @@ def predict(img):
 
 def initDb(img_dir):
     for breed_dir in os.listdir(img_dir):
-        breed_dir = os.path.join(img_dir, breed_dir)
+        #breed_dir = os.path.join(img_dir, breed_dir)
         try:
             with connection.cursor() as cursor:
                 sql = "INSERT INTO dogbreeds (breed) VALUES ({b})".format(b=breed_dir)
