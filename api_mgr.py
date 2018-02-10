@@ -56,6 +56,7 @@ def initDb(img_dir):
             connection.commit()
         finally:
             pass
+    print('ok')
     for breed_dir in os.listdir(img_dir):
         breed_dir_full = os.path.join(img_dir, breed_dir)
         for file in os.listdir(breed_dir):
