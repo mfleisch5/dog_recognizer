@@ -20,8 +20,7 @@ def train():
             # Read a single record
             sql = "SELECT i.imgpath, d.breed FROM imgMap i INNER JOIN dogbreeds d ON i.breed = d.id"
             cursor.execute(sql)
-            # result = cursor.fetchall()
-            result = cursor.fetchmany(30)
+            result = cursor.fetchall()
             print(result)
     finally:
         connection.close()
@@ -65,6 +64,3 @@ def addToDb(img, breed):
             cursor.execute(sql)
     finally:
         connection.commit()
-
-
-train()
