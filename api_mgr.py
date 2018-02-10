@@ -1,33 +1,71 @@
-import indicoio, os, base64
+import indicoio, os, pymysql.cursors
 from indicoio.custom import Collection
-indicoio.config.api_key = '5c6a25f102276fa6acbf0a5ac79548a5'
+
+indicoio.config.api_key = 'API'
 
 collection = Collection("dogs")
+connection = pymysql.connect(host='localhost',
+                             user='hbp',
+                             password='hbp2018',
+                             db='dogDB',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+
 
 # Add Data
-def train():
-    for dir in os.listdir('Images'):
-        pics, count = [], 0
-        for file in os.listdir('Images/' + dir):
-            print('Running:', dir, file)
-            pics.append([os.path.abspath('Images/' + dir + '/' + file), dir])
-            count += 1
-            if count == 5:
-                break
-        collection.add_data(pics)
 
-
-
+def train(img_dir):
+    try:
+        with connection.cursor() as cursor:
+            # Read a single record
+            sql = "SELECT i.imgpath, d.breed FROM imgMap i INNER JOIN dogbreeds d"
+            cursor.execute(sql)
+            # result = cursor.fetchall()
+            result = cursor.fetchmany(10)
+            print(result)
+    finally:
+        pass
+    '''
+      for dir in os.listdir(img_dir):
+          breed = []
+          dir = os.path.join(img_dir, dir)
+          for file in os.listdir(dir):
+              print('Running:', dir, file)
+              breed.append([os.path.abspath(os.path.join(dir, file)), dir])
+          collection.add_data(breed)
+      '''
     # Training
     collection.train()
 
     # Telling Collection to block until ready
     collection.wait()
 
-def predict( img ):
-    #This function will take in an image and predict the breed using the API
-    #print(*sorted(collection.predict(os.path.abspath('Images/Yorkshire_terrier/n02094433_4005.jpg')).items(), reverse=True,
-    # key=lambda p: p[1]), sep='\n')
 
-def addToDb( img, breed):
-    #This function will take in an image and the most likely breed to add to the database for future training
+def predict(img):
+    return sorted(collection.predict(img).items(), key=lambda s: s[1], reverse=True)[:5]
+
+
+def initDb(img_dir):
+    for breed_dir in os.listdir(img_dir):
+        breed_dir = os.path.join(img_dir, breed_dir)
+        try:
+            with connection.cursor() as cursor:
+                sql = "INSERT INTO breeds (breed) VALUES ({b})".format(b=breed_dir)
+                cursor.execute(sql, ())
+            connection.commit()
+        finally:
+            pass
+    for breed_dir in os.listdir(img_dir):
+        breed_dir_full = os.path.join(img_dir, breed_dir)
+        for file in os.listdir(breed_dir):
+            addToDb(os.path.join(breed_dir_full, file), breed_dir)
+
+
+def addToDb(img, breed):
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO imgmap (breed, imgpath) VALUES ((SELECT id FROM breeds WHERE breed={breed}), {path})".\
+                format(breed=breed, path=img)
+            cursor.execute(sql, ())
+    finally:
+        pass
