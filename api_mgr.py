@@ -24,7 +24,7 @@ def train(img_dir):
             result = cursor.fetchmany(10)
             print(result)
     finally:
-        pass
+        connection.close()
     '''
       for dir in os.listdir(img_dir):
           breed = []
@@ -50,8 +50,8 @@ def initDb(img_dir):
         breed_dir = os.path.join(img_dir, breed_dir)
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO breeds (breed) VALUES ({b})".format(b=breed_dir)
-                cursor.execute(sql, ())
+                sql = "INSERT INTO dogbreeds (breed) VALUES ({b})".format(b=breed_dir)
+                cursor.execute(sql)
             connection.commit()
         finally:
             pass
@@ -59,13 +59,15 @@ def initDb(img_dir):
         breed_dir_full = os.path.join(img_dir, breed_dir)
         for file in os.listdir(breed_dir):
             addToDb(os.path.join(breed_dir_full, file), breed_dir)
-
+    connection.close()
 
 def addToDb(img, breed):
     try:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO imgmap (breed, imgpath) VALUES ((SELECT id FROM breeds WHERE breed={breed}), {path})".\
+            sql = "INSERT INTO imgMap (breed, imgpath) VALUES ((SELECT id FROM dogbreeds WHERE breed={breed}), {path})".\
                 format(breed=breed, path=img)
-            cursor.execute(sql, ())
+            cursor.execute(sql)
     finally:
         pass
+
+initDb('Images')
