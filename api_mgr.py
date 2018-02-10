@@ -70,4 +70,4 @@ def addToDb(img, breed):
     finally:
         pass
 
-initDb('Images')
+initDb(os.path.realpath('Images'))
