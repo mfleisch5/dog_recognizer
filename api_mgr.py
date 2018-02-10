@@ -56,7 +56,6 @@ def initDb(img_dir):
             connection.commit()
         finally:
             pass
-    print('ok')
     for breed_dir in os.listdir(img_dir):
         breed_dir_full = os.path.join(img_dir, breed_dir)
         for file in os.listdir(breed_dir_full):
@@ -68,9 +67,9 @@ def addToDb(img, breed):
         with connection.cursor() as cursor:
             sql = "INSERT INTO imgMap (breed, imgpath) VALUES ((SELECT id FROM dogbreeds WHERE breed='{breed}'), '{path}')".\
                 format(breed=breed, path=img)
-	print(sql)
+	    print(sql)
             cursor.execute(sql)
     finally:
-        pass
+        connection.commit()
 
 initDb(os.path.realpath('Images'))
