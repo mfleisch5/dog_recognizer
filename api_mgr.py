@@ -1,4 +1,4 @@
-import indicoio, os, requests, pymysql.cursors
+import indicoio, os, pymysql.cursors
 from indicoio.custom import Collection
 
 indicoio.config.api_key = 'API'
@@ -46,23 +46,26 @@ def predict(img):
 
 
 def initDb(img_dir):
-    for dir in os.listdir(img_dir):
-        dir = os.path.join(img_dir, dir)
+    for breed_dir in os.listdir(img_dir):
+        breed_dir = os.path.join(img_dir, breed_dir)
         try:
             with connection.cursor() as cursor:
-                sql = "INSERT INTO breeds (breed) VALUES ({b})".format(b=dir)
+                sql = "INSERT INTO breeds (breed) VALUES ({b})".format(b=breed_dir)
                 cursor.execute(sql, ())
             connection.commit()
         finally:
             pass
-    for dir in os.listdir(img_dir):
-        dir = os.path.join(img_dir, dir)
-        for file in os.listdir(dir):
-            with connection.cursor() as cursor:
-                sql = "INSERT INTO imgmap (breed, imgpath) VALUES ((SELECT id FROM breeds WHERE breed={dir}), {path})".\
-                    format(dir=dir, path=os.path.join(dir, file))
-                cursor.execute(sql, ())
+    for breed_dir in os.listdir(img_dir):
+        breed_dir_full = os.path.join(img_dir, breed_dir)
+        for file in os.listdir(breed_dir):
+            addToDb(os.path.join(breed_dir_full, file), breed_dir)
 
 
 def addToDb(img, breed):
-    pass
+    try:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO imgmap (breed, imgpath) VALUES ((SELECT id FROM breeds WHERE breed={breed}), {path})".\
+                format(breed=breed, path=img)
+            cursor.execute(sql, ())
+    finally:
+        pass
