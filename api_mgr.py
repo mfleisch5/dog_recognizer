@@ -57,14 +57,14 @@ def initDb(img_dir):
             pass
     for breed_dir in os.listdir(img_dir):
         breed_dir_full = os.path.join(img_dir, breed_dir)
-        for file in os.listdir(breed_dir):
+        for file in os.listdir(breed_dir_full):
             addToDb(os.path.join(breed_dir_full, file), breed_dir)
     connection.close()
 
 def addToDb(img, breed):
     try:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO imgMap (breed, imgpath) VALUES ((SELECT id FROM dogbreeds WHERE breed={breed}), {path})".\
+            sql = "INSERT INTO imgMap (breed, imgpath) VALUES ((SELECT id FROM dogbreeds WHERE breed='{breed}'), '{path}')".\
                 format(breed=breed, path=img)
             cursor.execute(sql)
     finally:
