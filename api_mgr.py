@@ -51,6 +51,7 @@ def initDb(img_dir):
         try:
             with connection.cursor() as cursor:
                 sql = "INSERT INTO dogbreeds (breed) VALUES ('{b}')".format(b=breed_dir)
+		print(sql)
                 cursor.execute(sql)
             connection.commit()
         finally:
