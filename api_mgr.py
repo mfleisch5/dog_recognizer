@@ -68,6 +68,7 @@ def addToDb(img, breed):
         with connection.cursor() as cursor:
             sql = "INSERT INTO imgMap (breed, imgpath) VALUES ((SELECT id FROM dogbreeds WHERE breed='{breed}'), '{path}')".\
                 format(breed=breed, path=img)
+	print(sql)
             cursor.execute(sql)
     finally:
         pass
