@@ -18,7 +18,7 @@ def train(img_dir):
     try:
         with connection.cursor() as cursor:
             # Read a single record
-            sql = "SELECT i.imgpath, d.breed FROM imgMap i INNER JOIN dogbreeds d"
+            sql = "SELECT i.imgpath, d.breed FROM imgMap i INNER JOIN dogbreeds d ON i.breed = d.id"
             cursor.execute(sql)
             # result = cursor.fetchall()
             result = cursor.fetchmany(10)
