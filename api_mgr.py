@@ -24,16 +24,23 @@ def train(seg_num=0):
     finally:
         connection.close()
     for i, row in data[seg_num:]:
-        print('Segment run:', i)
-        for dog in row:
-            print('Running:', dog['imgpath'], dog['breed'])
-            collection.add_data([dog['imgpath'], dog['breed']])
+	successful = True
+	try:
+            for dog in row:
+            	print('Running:', dog['imgpath'], dog['breed'])
+            	collection.add_data([dog['imgpath'], dog['breed']])
 
-        # Training
-        collection.train()
+       	    # Training
+            collection.train()
 
-        # Telling Collection to block until ready
-        collection.wait()
+            # Telling Collection to block until ready
+            collection.wait()
+	except Exception as e:
+	    print('Segment run failed:', i, '\n', e)
+	    successful = False
+	finally:
+	    with open('log.txt', 'w') as log:
+	    	log.write(str(i) + ': ' + str(successful))
 
 
 def segment_data(data):
@@ -51,7 +58,7 @@ def segment_data(data):
                 segment.append(img_dict[k].pop())
                 cut += 1
         res.append(segment)
-    return enumerate(res)
+    return list(enumerate(res))
 
 
 def predict(img):
@@ -85,4 +92,4 @@ def add_to_db(img, breed):
     finally:
         connection.commit()
 
-train()
+
