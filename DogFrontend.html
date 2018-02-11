@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Preview images</title>
+    <style>
+        #gallery .thumbnail{
+            width:150px;
+            height: 150px;
+            float:left;
+            margin:2px;
+        }
+        #gallery .thumbnail img{
+            width:150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+
+<input type="file" id="fileinput" multiple="multiple" />
+<!--curl -F "file=@data.jpg" http://ec2-52-91-115-110.compute-1.amazonaws.com/upload-->
+<div id="out"></div>
+<p id="debug"></p>
+<div id="gallery"></div>
+<script>
+
+document.getElementById('fileinput').addEventListener('change', function(){
+    for(var i = 0; i<this.files.length; i++){
+        var file =  this.files[i];
+        // This code is only for demo ...
+        console.group("File "+i);
+        console.log("name : " + file.name);
+        console.log("size : " + file.size);
+        console.log("type : " + file.type);
+        console.log("date : " + file.lastModified);
+        console.groupEnd();
+    }
+}, false);
+
+function previewImage(file) {
+    var galleryId = "gallery";
+    var gallery = document.getElementById(galleryId);
+    var imageType = /image.*/;
+    if (!file.type.match(imageType)) {
+        throw "File Type must be an image";
+    }
+    var thumb = document.createElement("div");
+    thumb.classList.add('thumbnail'); // Add the class thumbnail to the created div
+    var img = document.createElement("img");
+    img.file = file;
+    thumb.appendChild(img);
+    gallery.appendChild(thumb);
+    // Using FileReader to display the image content
+    var reader = new FileReader();
+    reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
+    reader.readAsDataURL(file);
+}
+
+function uploadFile(file){
+    var out = document.getElementById("out");
+    var debug = document.getElementById("debug");
+    var url = 'http://ec2-52-91-115-110.compute-1.amazonaws.com/upload';
+    var xhr = new XMLHttpRequest();
+    var fd = new FormData();
+    xhr.open("POST", url, true);
+    xhr.onreadystatechange = function() {
+        if (this.readyState === XMLHttpRequest.DONE && this.status == 200) {
+            // Every thing ok, file uploaded
+            console.log(this.response); // handle response.
+	    //debug.innerHTML = "Debug "
+	    var r = JSON.stringify(JSON.parse(this.responseText));
+	    console.log(r);
+	    var o = "Response: " + r.replace("[[","").replace("]]","");
+	    out.innerHTML = o;
+        }
+	//debug.innerHTML = debug.innerHTML + " " + this.readyState + " " + this.status;
+    };
+    fd.append("file", file);
+    xhr.send(fd);
+    
+    
+}
+
+var uploadfiles = document.querySelector('#fileinput');
+uploadfiles.addEventListener('change', function () {
+    var files = this.files;
+    for(var i=0; i<files.length; i++){
+	previewImage(this.files[i]);
+        uploadFile(this.files[i]);
+	console.log("heyyy ;)");
+    }
+ 
+}, false);
+
+
+</script>
+</body>
+</html>
