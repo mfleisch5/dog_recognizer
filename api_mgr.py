@@ -24,23 +24,23 @@ def train(seg_num=0):
     finally:
         connection.close()
     for i, row in data[seg_num:]:
-	successful = True
-	try:
+        successful = True
+        try:
             for dog in row:
-            	print('Running:', dog['imgpath'], dog['breed'])
-            	collection.add_data([dog['imgpath'], dog['breed']])
+                print('Running:', dog['imgpath'], dog['breed'])
+                collection.add_data([dog['imgpath'], dog['breed']])
 
-       	    # Training
+            # Training
             collection.train()
 
             # Telling Collection to block until ready
             collection.wait()
-	except Exception as e:
-	    print('Segment run failed:', i, '\n', e)
-	    successful = False
-	finally:
-	    with open('log.txt', 'w') as log:
-	    	log.write(str(i) + ': ' + str(successful))
+        except Exception as e:
+            print('Segment run failed:', i, '\n', e)
+            successful = False
+        finally:
+            with open('log.txt', 'w') as log:
+                log.write(str(i) + ': ' + str(successful))
 
 
 def segment_data(data):
@@ -93,3 +93,5 @@ def add_to_db(img, breed):
         connection.commit()
 
 
+def status_check():
+    print(collection.info())
