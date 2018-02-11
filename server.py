@@ -3,6 +3,8 @@ from flask import Flask, redirect, url_for, json
 from flask import request
 from werkzeug.utils import secure_filename
 
+import sys
+sys.path.insert(0, "/home/ubuntu/dog_recognizer")
 import api_mgr
 
 application = Flask(__name__)
