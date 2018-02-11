@@ -1,0 +1,92 @@
+//
+//  ViewController.swift
+//  Genuine Dogs
+//
+//  Created by Joseph Mullally on 2/10/18.
+//  Copyright © 2018 Joseph Mullally. All rights reserved.
+//
+
+import UIKit
+
+class ViewController: UIViewController, UIImagePickerControllerDelegate,
+    UINavigationControllerDelegate{
+
+    @IBOutlet weak var Image_View:
+    UIImageView!
+    
+    let imagepicker = UIImagePickerController()
+    
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        imagepicker.delegate = self
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    @IBAction func Press_Me(_ sender: Any) {
+        imagepicker.delegate = self
+        imagepicker.sourceType = UIImagePickerControllerSourceType.savedPhotosAlbum
+        self.present(imagepicker, animated: true, completion: nil)
+    }
+    @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String: Any]){
+        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage
+        {
+            Image_View.image = image
+            ViewController.callPost(u1: URL(string:"http://ec2-52-91-115-110.compute-1.amazonaws.com/upload")!, "file=" + ViewController.imageToStr(img: image), { (arg: (message: String, data: Data?)) -> Void in
+                
+                let (s, d) = arg
+                print("Hello World");
+                print(s)
+                print(d)
+            });
+        }
+        dismiss(animated: true, completion: nil)
+        
+    }
+    
+    //callPost("http://ec2-52-91-115-110.compute-1.amazonaws.com/upload", "file=" + imageToStr(THE_IMAGE), CALLBACK_FUNCTION);
+    
+    static func imageToStr(img:UIImage) -> String {
+        let quality: CGFloat = 1.0
+        let data: Data = UIImageJPEGRepresentation(img, quality)!
+        let dat1 = data.base64EncodedString(options: NSData.Base64EncodingOptions(rawValue:0))
+            
+            //data.base64encodedstringoption(NSData.Base64DecodingOptions.fromRaw(0)!)
+        
+        print(dat1)
+        return dat1
+    }
+    
+    static func callPost(u1 url:URL, _ params:String, _ finish: @escaping ((message:String, data:Data?)) -> Void)
+    {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        //let postString = self.getPostString(params: params)
+        request.httpBody = params.data(using: .utf8)
+        
+        var result:(message:String, data:Data?) = (message: "Fail", data: nil)
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            
+            if(error != nil)
+            {
+                result.message = "Fail Error not null : \(error.debugDescription)"
+            }
+            else
+            {
+                result.message = "Success"
+                result.data = data
+            }
+            
+            finish(result)
+        }
+        task.resume()
+    }
+    
+}
+
