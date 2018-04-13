@@ -46,10 +46,7 @@ def train(seg_num=0):
 def segment_data(data):
     img_dict, res = dict(), []
     for img in data:
-        if img['breed'] in img_dict:
-            img_dict[img['breed']].append(img)
-        else:
-            img_dict[img['breed']] = [img]
+        img_dict.setdefault(img['breed'], []).append(img)
     while any(img_dict.values()):
         segment = []
         for k in img_dict:
